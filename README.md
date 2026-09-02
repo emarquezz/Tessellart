@@ -11,6 +11,20 @@
 tessellart opens weighted Voronoi geometry saved as `.voronoi.json` and lets you refine the figure without recalculating its cells. Labels, borders, colors, legend, canvas, and export settings remain editable while the geometry stays locked.
 
 > [!IMPORTANT]
+> ## Create geometry with VoroNest
+>
+> <p align="center">
+>   <a href="https://github.com/emarquezz/VoroNest">
+>     <img src="assets/voronest-logo.png" alt="Create a treemap with VoroNest" width="128"><br>
+>     <strong>Open VoroNest on GitHub →</strong>
+>   </a>
+> </p>
+>
+> **VoroNest generates the geometry. Tessellart personalizes the exported figure.**
+>
+> Use [`VoroNest`](https://github.com/emarquezz/VoroNest) from Python or Jupyter to calculate a hierarchical weighted Voronoi treemap and export its editable `.voronoi.json` project.
+
+> [!IMPORTANT]
 > ## Looking for the original R tools?
 >
 > **[Explore WeightedTreemaps](https://github.com/m-jahn/WeightedTreemaps)** — the upstream R package for calculating and drawing nested, additively weighted Voronoi and sunburst treemaps.
@@ -23,7 +37,7 @@ My M1 Mac and RStudio never quite got along, and I was tired of switching laptop
 
 ## What tessellart does
 
-The companion Python adaptation calculates the Voronoi geometry; tessellart visualizes and styles its `.voronoi.json` output. The portable format is documented in [`docs/JSON_FORMAT.md`](docs/JSON_FORMAT.md).
+[`VoroNest`](https://github.com/emarquezz/VoroNest) calculates the Voronoi geometry; tessellart visualizes and styles its `.voronoi.json` output. The portable format is documented in [`docs/JSON_FORMAT.md`](docs/JSON_FORMAT.md).
 
 A heart-shaped **Tiny Tree of Life** project opens automatically, so you can try the editing controls before loading your own figure. It is a friendly sampler of selected organism groups, not a complete phylogeny. Its names are real examples, while its values and cell areas are synthetic and do not encode abundance, diversity, age, or evolutionary distance.
 

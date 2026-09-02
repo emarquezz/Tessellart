@@ -1,6 +1,6 @@
 # JSON input format
 
-tessellart opens portable JSON exported by `weighted-treemaps-python` and JSON saved by the editor itself. It does not directly open R S4 objects, `.rds`, `.RData`, PNG, or SVG files.
+tessellart opens portable JSON exported by [`VoroNest`](https://github.com/emarquezz/VoroNest) and JSON saved by the editor itself. It does not directly open R S4 objects, `.rds`, `.RData`, PNG, or SVG files.
 
 ## Minimum structure
 

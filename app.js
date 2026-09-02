@@ -64,9 +64,9 @@
   }
 
   var levelDefaults = {
-    "1": { fontSize: 25, fontFamily: "Arial, Helvetica, sans-serif", fontWeight: 700, color: "#ffffff", lineHeight: 1.05, letterSpacing: 0, wrapWidth: 185, borderWidth: 21, borderMode: "background", borderColor: "#ffffff", innerBorderVisible: true, innerBorderWidth: 21, labelsVisible: false, autoFit: false, autoSize: false, autoSizeMin: 5, autoSizeMax: 120, autoSizeMaxLines: 4, fitPadding: 5 },
-    "2": { fontSize: 17, fontFamily: "Arial, Helvetica, sans-serif", fontWeight: 700, color: "#111827", lineHeight: 1.08, letterSpacing: 0, wrapWidth: 145, borderWidth: 4, borderMode: "cell", borderColor: "#ffffff", innerBorderVisible: false, innerBorderWidth: 0, labelsVisible: true, autoFit: false, autoSize: true, autoSizeMin: 5, autoSizeMax: 120, autoSizeMaxLines: 4, fitPadding: 5 },
-    "3": { fontSize: 12, fontFamily: "Arial, Helvetica, sans-serif", fontWeight: 500, color: "#111827", lineHeight: 1.1, letterSpacing: 0, wrapWidth: 96, borderWidth: 1.4, borderMode: "background", borderColor: "#ffffff", innerBorderVisible: false, innerBorderWidth: 0, labelsVisible: false, autoFit: true, autoSize: false, autoSizeMin: 5, autoSizeMax: 96, autoSizeMaxLines: 4, fitPadding: 5 }
+    "1": { fontSize: 25, fontFamily: "Arial, Helvetica, sans-serif", fontWeight: 700, color: "#ffffff", lineHeight: 1.05, letterSpacing: 0, wrapWidth: 185, borderWidth: 21, borderMode: "background", borderColor: "#ffffff", innerBorderVisible: true, innerBorderWidth: 21, labelsVisible: false, autoFit: false, autoSize: false, autoSizeMin: 14, autoSizeMax: 120, autoSizeMaxLines: 4, fitPadding: 5 },
+    "2": { fontSize: 17, fontFamily: "Arial, Helvetica, sans-serif", fontWeight: 700, color: "#111827", lineHeight: 1.08, letterSpacing: 0, wrapWidth: 145, borderWidth: 4, borderMode: "cell", borderColor: "#ffffff", innerBorderVisible: false, innerBorderWidth: 0, labelsVisible: true, autoFit: false, autoSize: true, autoSizeMin: 14, autoSizeMax: 120, autoSizeMaxLines: 4, fitPadding: 5 },
+    "3": { fontSize: 12, fontFamily: "Arial, Helvetica, sans-serif", fontWeight: 500, color: "#111827", lineHeight: 1.1, letterSpacing: 0, wrapWidth: 96, borderWidth: 1.4, borderMode: "background", borderColor: "#ffffff", innerBorderVisible: false, innerBorderWidth: 0, labelsVisible: false, autoFit: true, autoSize: false, autoSizeMin: 14, autoSizeMax: 96, autoSizeMaxLines: 4, fitPadding: 5 }
   };
   var canvasDefaults = { width: 1400, height: 980, background: "#f7f4ed", padding: 44, cellGap: 0, title: "Voronoi treemap", titleVisible: true, titleSize: 34, titleColor: "#25313b", legendVisible: true, legendPosition: "right", legendSize: 450, legendFontSize: 26, legendTitle: "LEVEL 1", legendTitleVisible: true, legendTitleSize: 25, legendOrder: [], legendGrowCanvas: true };
 
@@ -364,6 +364,7 @@
       plotX: plotX, plotY: plotY, plotWidth: plotWidth, plotHeight: plotHeight,
       scaleX: scaleX, scaleY: scaleY, tx: tx, ty: ty,
       legendX: canvas.legendPosition === "right" ? canvas.width - canvas.padding - legendWidth : canvas.padding,
+      legendY: canvas.padding,
       legendWidth: legendWidth,
       transform: function (point) { return [tx + point[0] * scaleX, ty + point[1] * scaleY]; }
     };
@@ -389,16 +390,22 @@
     var swatchSize = clamp(fontSize * 1.45, 18, 38);
     var textX = swatchSize + 10;
     var lineStep = fontSize * 1.15;
-    var titleLineStep = titleSize * 1.15;
+    var titleLineStep = titleSize * 1.2;
     var rowGap = Math.max(8, fontSize * .25);
     var textStyle = { fontFamily: "Arial, Helvetica, sans-serif", fontWeight: 600, letterSpacing: 0 };
     var titleStyle = { fontFamily: "Arial, Helvetica, sans-serif", fontWeight: 700, letterSpacing: 0 };
     var roots = legendCellsInOrder().filter(function (cell) { return cell.legend.visible; });
     var showTitle = canvas.legendTitleVisible && Boolean(String(canvas.legendTitle).trim());
     var titleLines = showTitle ? wrapLegendText(canvas.legendTitle, Math.max(20, layout.legendWidth), titleSize, titleStyle) : [];
-    var titleHeight = titleLines.length ? titleSize + (titleLines.length - 1) * titleLineStep : 0;
+    // Use an explicit positive alphabetic baseline. Some SVG rasterizers do
+    // not honor `dominant-baseline: hanging` consistently and clip text at y=0.
+    var titleBaseline = titleLines.length ? titleSize : 0;
+    var titleHeight = titleLines.length ? titleSize * 1.2 + (titleLines.length - 1) * titleLineStep : 0;
     var titleGap = titleLines.length && roots.length ? Math.max(10, fontSize * .35) : 0;
-    var cursorY = titleHeight + titleGap;
+    // Keep legend entries aligned with the plot while allowing the legend
+    // heading to share the figure-title band above them.
+    var plotAlignedStart = roots.length ? Math.max(0, layout.plotY + 10 - layout.legendY) : 0;
+    var cursorY = Math.max(titleHeight + titleGap, plotAlignedStart);
     var entries = roots.map(function (cell, index) {
       var lines = wrapLegendText(cell.legend.text, Math.max(20, layout.legendWidth - textX), fontSize, textStyle);
       var textHeight = fontSize + Math.max(0, lines.length - 1) * lineStep;
@@ -410,6 +417,7 @@
     return {
       fontSize: fontSize,
       titleSize: titleSize,
+      titleBaseline: titleBaseline,
       titleLines: titleLines,
       titleLineStep: titleLineStep,
       swatchSize: swatchSize,
@@ -426,7 +434,7 @@
     if (!project || !project.canvas.legendVisible || !project.canvas.legendGrowCanvas) return;
     var layout = getLayout();
     var metrics = getLegendMetrics(layout);
-    var requiredHeight = Math.ceil(layout.plotY + 10 + metrics.requiredHeight + project.canvas.padding);
+    var requiredHeight = Math.ceil(layout.legendY + metrics.requiredHeight + project.canvas.padding);
     if (requiredHeight > project.canvas.height) project.canvas.height = requiredHeight;
   }
 
@@ -564,7 +572,7 @@
     svg.appendChild(svgElement("rect", { width: "100%", height: "100%", fill: canvas.background }));
 
     if (canvas.titleVisible && canvas.title) {
-      svg.appendChild(svgElement("text", { x: canvas.width / 2, y: canvas.padding + canvas.titleSize, "text-anchor": "middle", "font-family": "Arial, Helvetica, sans-serif", "font-size": canvas.titleSize, "font-weight": 700, fill: canvas.titleColor }, canvas.title));
+      svg.appendChild(svgElement("text", { x: layout.plotX + layout.plotWidth / 2, y: canvas.padding + canvas.titleSize, "text-anchor": "middle", "font-family": "Arial, Helvetica, sans-serif", "font-size": canvas.titleSize, "font-weight": 700, fill: canvas.titleColor }, canvas.title));
     }
 
     // Render polygons directly in final canvas coordinates. The root SVG can
@@ -635,13 +643,13 @@
       var legendClipId = "legend-column-clip";
       var legendDefinitions = svgElement("defs", { "data-layer": "legend-clip" });
       var legendClip = svgElement("clipPath", { id: legendClipId, clipPathUnits: "userSpaceOnUse" });
-      legendClip.appendChild(svgElement("rect", { x: 0, y: 0, width: layout.legendWidth, height: Math.max(0, canvas.height - layout.plotY - canvas.padding - 10) }));
+      legendClip.appendChild(svgElement("rect", { x: 0, y: 0, width: layout.legendWidth, height: Math.max(0, canvas.height - layout.legendY - canvas.padding) }));
       legendDefinitions.appendChild(legendClip);
       svg.appendChild(legendDefinitions);
-      var legend = svgElement("g", { "data-layer": "legend", transform: "translate(" + layout.legendX + " " + (layout.plotY + 10) + ")", "clip-path": "url(#" + legendClipId + ")" });
+      var legend = svgElement("g", { "data-layer": "legend", transform: "translate(" + layout.legendX + " " + layout.legendY + ")", "clip-path": "url(#" + legendClipId + ")" });
       if (legendMetrics.titleLines.length) {
-        var legendTitle = svgElement("text", { x: 0, y: 0, "dominant-baseline": "hanging", "font-family": legendMetrics.titleStyle.fontFamily, "font-size": legendMetrics.titleSize, "font-weight": legendMetrics.titleStyle.fontWeight, fill: canvas.titleColor });
-        legendMetrics.titleLines.forEach(function (line, lineIndex) { legendTitle.appendChild(svgElement("tspan", { x: 0, y: lineIndex * legendMetrics.titleLineStep }, line)); });
+        var legendTitle = svgElement("text", { x: 0, y: legendMetrics.titleBaseline, "font-family": legendMetrics.titleStyle.fontFamily, "font-size": legendMetrics.titleSize, "font-weight": legendMetrics.titleStyle.fontWeight, fill: canvas.titleColor });
+        legendMetrics.titleLines.forEach(function (line, lineIndex) { legendTitle.appendChild(svgElement("tspan", { x: 0, y: legendMetrics.titleBaseline + lineIndex * legendMetrics.titleLineStep }, line)); });
         legend.appendChild(legendTitle);
       }
       legendMetrics.entries.forEach(function (entry) {

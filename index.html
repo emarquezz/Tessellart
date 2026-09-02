@@ -1,0 +1,202 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: GPL-3.0-only -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>tessellart · Voronoi figure editor</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span>
+            <strong>tessellart</strong>
+            <small>the quiet studio after tessellation</small>
+          </span>
+        </div>
+        <nav class="toolbar" aria-label="Project actions">
+          <input id="project-file" type="file" accept=".json,.voronoi.json,application/json" hidden />
+          <button id="open-project" class="button outline" type="button">Open project</button>
+          <button id="save-project" class="button ghost" type="button" title="Save an editable project">Save JSON</button>
+          <span class="divider"></span>
+          <button id="undo" class="icon-button" type="button" title="Undo (Command/Ctrl+Z)" disabled>↶</button>
+          <button id="redo" class="icon-button" type="button" title="Redo (Shift+Command/Ctrl+Z)" disabled>↷</button>
+          <button id="reset-project" class="button ghost" type="button">Reset styling</button>
+          <span class="divider"></span>
+          <button id="export-svg" class="button outline" type="button">Export SVG</button>
+          <label class="compact-select" for="png-scale">
+            <span class="sr-only">PNG scale</span>
+            <select id="png-scale">
+              <option value="1">PNG 1×</option>
+              <option value="2" selected>PNG 2×</option>
+              <option value="3">PNG 3×</option>
+              <option value="4">PNG 4×</option>
+            </select>
+          </label>
+          <button id="export-png" class="button primary" type="button">Export PNG</button>
+        </nav>
+      </header>
+
+      <section class="editor-grid">
+        <aside class="settings-panel" aria-label="Figure settings">
+          <div class="panel-intro">
+            <span class="eyebrow">Live appearance</span>
+            <h1>Typography & borders</h1>
+            <p>These controls redraw the figure only. Calculated polygons and values stay locked.</p>
+          </div>
+
+          <aside class="upstream-card" aria-label="Original WeightedTreemaps projects">
+            <span>Built on open work</span>
+            <a class="upstream-primary" href="https://github.com/m-jahn/WeightedTreemaps" target="_blank" rel="noreferrer">WeightedTreemaps ↗</a>
+            <p>Original R package by Michael Jahn and contributors.</p>
+            <a class="upstream-secondary" href="https://m-jahn.shinyapps.io/ShinyTreemaps/" target="_blank" rel="noreferrer">Open the full ShinyTreemaps app ↗</a>
+          </aside>
+
+          <div id="level-tabs" class="tabs" role="tablist" aria-label="Hierarchy level"></div>
+
+          <section class="control-stack" aria-label="Selected level settings">
+            <div id="level-one-legend-note" class="context-note" hidden>
+              <strong>Level 1 names are shown in the legend</strong>
+              <span>Adjust their text size and reserved space under Canvas → Legend.</span>
+            </div>
+
+            <div id="level-label-controls" class="control-stack">
+              <label class="switch-row">
+                <span><strong>Show labels</strong><small id="level-count"></small></span>
+                <input id="labels-visible" type="checkbox" />
+              </label>
+              <label class="switch-row">
+                <span><strong>Fit labels inside cells</strong><small>Hide labels that do not fit or collide</small></span>
+                <input id="auto-fit" type="checkbox" />
+              </label>
+
+              <label class="switch-row">
+                <span><strong>Automatically maximize each label</strong><small>Each cell receives its own largest fitting size</small></span>
+                <input id="auto-size" type="checkbox" />
+              </label>
+
+              <div id="manual-font-size-row" class="control"><label for="font-size">Font size <output id="font-size-output"></output></label><input id="font-size" type="range" min="5" max="96" step="1" /></div>
+              <div id="auto-size-row" class="control"><label for="auto-size-max">Automatic size ceiling <output id="auto-size-max-output"></output></label><input id="auto-size-max" type="range" min="12" max="180" step="1" /></div>
+              <div class="control"><label for="font-weight">Font weight</label><select id="font-weight"><option value="400">Regular</option><option value="500">Medium</option><option value="600">Semi-bold</option><option value="700">Bold</option><option value="800">Extra-bold</option></select></div>
+              <label class="color-control" for="text-color"><span>Text color</span><span><input id="text-color" type="color" /><code id="text-color-code"></code></span></label>
+              <div class="control"><label for="line-height">Line spacing <output id="line-height-output"></output></label><input id="line-height" type="range" min="0.8" max="2" step="0.05" /></div>
+              <div class="control"><label for="letter-spacing">Letter spacing <output id="letter-spacing-output"></output></label><input id="letter-spacing" type="range" min="-2" max="12" step="0.25" /></div>
+              <div class="control"><label for="wrap-width">Text wrapping width <output id="wrap-width-output"></output></label><input id="wrap-width" type="range" min="36" max="360" step="1" /></div>
+            </div>
+
+            <div class="section-rule"><span>Borders</span></div>
+            <div class="control"><label for="border-width">Centered border width <output id="border-width-output"></output></label><input id="border-width" type="range" min="0" max="24" step="0.25" /></div>
+            <div class="control"><label for="border-mode">Centered border color</label><select id="border-mode"><option value="cell">Cell / category color</option><option value="background">Canvas background</option><option value="custom">Custom color</option></select></div>
+            <label id="custom-border-row" class="color-control" for="border-color"><span>Custom border</span><span><input id="border-color" type="color" /><code id="border-color-code"></code></span></label>
+
+            <div id="level-one-inner-border-controls" class="control-stack nested-controls">
+              <div class="section-rule"><span>Inside category rim</span></div>
+              <label class="switch-row compact">
+                <span><strong>Show second Level 1 border</strong><small>Category color, clipped inside each Level 1 cell</small></span>
+                <input id="inner-border-visible" type="checkbox" />
+              </label>
+              <div id="inner-border-width-row" class="control"><label for="inner-border-width">Visible inside width <output id="inner-border-width-output"></output></label><input id="inner-border-width" type="range" min="0" max="30" step="0.25" /></div>
+              <p class="micro-note">This rim is drawn inside the centered general border, reproducing the double-border effect without changing any polygon.</p>
+            </div>
+
+            <div class="section-rule"><span>Canvas</span></div>
+            <label class="text-control" for="figure-title"><span>Figure title</span><input id="figure-title" type="text" /></label>
+            <label class="switch-row compact"><strong>Show title</strong><input id="title-visible" type="checkbox" /></label>
+            <div class="control"><label for="title-size">Title size <output id="title-size-output"></output></label><input id="title-size" type="range" min="12" max="72" step="1" /></div>
+            <label class="color-control" for="background-color"><span>Background</span><span><input id="background-color" type="color" /><code id="background-color-code"></code></span></label>
+            <div class="control"><label for="cell-gap">Visual cell gap <output id="cell-gap-output"></output></label><input id="cell-gap" type="range" min="0" max="12" step="0.25" /></div>
+            <p class="micro-note">The gap is a background-colored separator stroke. It never changes polygon coordinates or values.</p>
+            <label class="switch-row compact"><strong>Show legend</strong><input id="legend-visible" type="checkbox" /></label>
+            <div id="legend-settings" class="control-stack nested-controls">
+              <div class="control" id="legend-position-row"><label for="legend-position">Legend position</label><select id="legend-position"><option value="left">Left</option><option value="right">Right</option></select></div>
+              <label class="text-control" for="legend-title"><span>Legend title</span><textarea id="legend-title" rows="2"></textarea></label>
+              <label class="switch-row compact"><strong>Show legend title</strong><input id="legend-title-visible" type="checkbox" /></label>
+              <div id="legend-title-size-row" class="control"><label for="legend-title-size">Legend title size <output id="legend-title-size-output"></output></label><input id="legend-title-size" type="range" min="8" max="72" step="1" /></div>
+              <div class="control"><label for="legend-font-size">Legend label size <output id="legend-font-size-output"></output></label><input id="legend-font-size" type="range" min="8" max="40" step="1" /></div>
+              <div class="control"><label for="legend-width">Reserved legend width <output id="legend-width-output"></output></label><input id="legend-width" type="range" min="120" max="1000" step="5" /></div>
+              <label class="switch-row compact">
+                <span><strong>Grow canvas to fit legend</strong><small>Preserves the treemap area and prevents clipped legend rows</small></span>
+                <input id="legend-grow-canvas" type="checkbox" />
+              </label>
+              <p class="micro-note">A wider reserved area prevents larger legend labels from entering the treemap.</p>
+            </div>
+
+            <div class="section-rule"><span>Output working area</span></div>
+            <p class="micro-note">Increase the canvas width or height when the title, legend, or labels need more room.</p>
+            <div class="control-pair">
+              <label for="canvas-width">Width (px)<input id="canvas-width" type="number" min="320" max="10000" step="1" /></label>
+              <label for="canvas-height">Height (px)<input id="canvas-height" type="number" min="240" max="10000" step="1" /></label>
+            </div>
+          </section>
+        </aside>
+
+        <section class="workspace-column">
+          <header class="workspace-toolbar">
+            <div class="project-summary"><strong id="project-name">Loading project…</strong><small id="project-stats"></small></div>
+            <div class="zoom-controls" aria-label="Preview zoom">
+              <button id="zoom-out" class="icon-button" type="button" aria-label="Zoom out">−</button>
+              <input id="zoom" type="range" min="0.15" max="2.5" step="0.05" value="0.5" aria-label="Preview zoom" />
+              <output id="zoom-output">50%</output>
+              <button id="zoom-in" class="icon-button" type="button" aria-label="Zoom in">+</button>
+              <button id="zoom-fit" class="icon-button" type="button" aria-label="Fit figure">⌗</button>
+            </div>
+          </header>
+          <div id="workspace" class="workspace">
+            <div id="canvas-stage" class="canvas-stage">
+              <svg id="treemap" role="img" aria-labelledby="svg-title svg-description"></svg>
+            </div>
+          </div>
+          <footer class="statusbar" aria-live="polite"><span class="status-dot"></span><span id="status">Opening tessellart…</span><strong>Geometry locked</strong></footer>
+        </section>
+
+        <aside class="selection-panel" aria-label="Selected cell settings">
+          <div id="selection-empty" class="selection-empty">
+            <div class="empty-icon" aria-hidden="true">⬡</div>
+            <h2>Select a cell</h2>
+            <p>Click a polygon, map label, or legend entry to edit it. Drag a visible map label directly on the figure.</p>
+          </div>
+          <div id="selection-editor" hidden>
+            <header class="selection-heading">
+              <span class="eyebrow">Selected cell</span>
+              <h2 id="selected-name"></h2>
+              <p id="selected-path"></p>
+            </header>
+            <section class="control-stack selection-body">
+              <label class="color-control" for="selected-fill"><span>Cell fill</span><span><input id="selected-fill" type="color" /><code id="selected-fill-code"></code></span></label>
+              <div id="selection-level-one-note" class="context-note" hidden>
+                <strong>This Level 1 name belongs to the legend</strong>
+                <span>Edit its displayed text and order below. Overall legend typography is under Canvas.</span>
+              </div>
+              <div id="selected-legend-controls" class="control-stack" hidden>
+                <label class="text-control" for="selected-legend-label"><span>Displayed legend label</span><textarea id="selected-legend-label" rows="3"></textarea></label>
+                <label class="switch-row compact"><strong>Show in legend</strong><input id="selected-legend-visible" type="checkbox" /></label>
+                <p class="micro-note">Manual line breaks are preserved. The original category name and source hierarchy stay unchanged.</p>
+                <div class="position-readout"><span>Legend position</span><code id="selected-legend-position"></code></div>
+                <div class="button-pair">
+                  <button id="legend-move-up" class="button outline" type="button">↑ Earlier</button>
+                  <button id="legend-move-down" class="button outline" type="button">↓ Later</button>
+                </div>
+                <button id="reset-legend-label" class="button ghost wide" type="button">Use original category name</button>
+              </div>
+              <div id="selected-label-controls" class="control-stack">
+                <label class="text-control" for="selected-label"><span>Displayed label</span><textarea id="selected-label" rows="4"></textarea></label>
+                <label class="switch-row compact"><strong>Show this label</strong><input id="selected-visible" type="checkbox" /></label>
+                <div class="control"><label for="selected-font-size">Individual font size <output id="selected-font-size-output"></output></label><input id="selected-font-size" type="range" min="5" max="180" step="1" /></div>
+                <label class="color-control" for="selected-text-color"><span>Individual text color</span><span><input id="selected-text-color" type="color" /><code id="selected-text-color-code"></code></span></label>
+                <div class="position-readout"><span>Label offset</span><code id="selected-offset"></code></div>
+                <p class="micro-note">Drag the label on the figure. The calculated cell geometry stays unchanged.</p>
+                <button id="reset-label" class="button outline wide" type="button">Reset this label</button>
+              </div>
+            </section>
+          </div>
+        </aside>
+      </section>
+    </main>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>

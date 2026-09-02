@@ -1,0 +1,405 @@
+{
+  "schema": {
+    "name": "weighted-treemaps-editor",
+    "version": "1.0.0"
+  },
+  "generator": {
+    "name": "synthetic-demo",
+    "version": "1.0.0",
+    "geometryEngine": "hand-authored synthetic fixture"
+  },
+  "project": {
+    "name": "Synthetic Voronoi Demo",
+    "title": "Synthetic Voronoi Demo"
+  },
+  "canvas": {
+    "width": 1600,
+    "height": 1100,
+    "viewBox": [0, 0, 1000, 800],
+    "preserveAspectRatio": "none",
+    "background": "#fffdf8",
+    "padding": 44,
+    "cellGap": 0,
+    "legendVisible": true,
+    "legendPosition": "right",
+    "legendSize": 450,
+    "legendFontSize": 26,
+    "legendTitle": "REGIONS",
+    "legendTitleVisible": true,
+    "legendTitleSize": 25,
+    "legendGrowCanvas": true
+  },
+  "hierarchy": {
+    "levels": [
+      { "level": 1, "key": "region", "name": "Region" },
+      { "level": 2, "key": "theme", "name": "Theme" },
+      { "level": 3, "key": "item", "name": "Item" }
+    ],
+    "rootIds": ["region-aurora", "region-tide", "region-meadow", "region-ember"]
+  },
+  "source": {
+    "description": "Wholly synthetic example geometry for demonstrating the editor."
+  },
+  "style": {
+    "title": {
+      "text": "Synthetic Voronoi Demo",
+      "visible": true,
+      "fontSize": 34,
+      "color": "#25313b"
+    },
+    "legend": {
+      "visible": true,
+      "position": "right",
+      "size": 450,
+      "title": {
+        "text": "REGIONS",
+        "visible": true,
+        "fontSize": 25
+      }
+    }
+  },
+  "cells": [
+    {
+      "id": "region-aurora",
+      "parentId": null,
+      "level": 1,
+      "name": "Aurora",
+      "path": ["Aurora"],
+      "value": 42,
+      "polygon": [[0, 0], [500, 0], [510, 180], [495, 400], [250, 390], [0, 400]],
+      "categoryColor": "#776ac4",
+      "fill": "#776ac4",
+      "legend": { "text": "Aurora", "visible": true },
+      "label": { "text": "Aurora", "anchor": [244, 191], "offset": [0, 0], "visible": true }
+    },
+    {
+      "id": "region-tide",
+      "parentId": null,
+      "level": 1,
+      "name": "Tide",
+      "path": ["Tide"],
+      "value": 38,
+      "polygon": [[500, 0], [1000, 0], [1000, 400], [760, 390], [495, 400], [510, 180]],
+      "categoryColor": "#318fa5",
+      "fill": "#318fa5",
+      "legend": { "text": "Tide", "visible": true },
+      "label": { "text": "Tide", "anchor": [752, 194], "offset": [0, 0], "visible": true }
+    },
+    {
+      "id": "region-meadow",
+      "parentId": null,
+      "level": 1,
+      "name": "Meadow",
+      "path": ["Meadow"],
+      "value": 36,
+      "polygon": [[0, 400], [250, 390], [495, 400], [510, 600], [500, 800], [0, 800]],
+      "categoryColor": "#57976d",
+      "fill": "#57976d",
+      "legend": { "text": "Meadow", "visible": true },
+      "label": { "text": "Meadow", "anchor": [251, 601], "offset": [0, 0], "visible": true }
+    },
+    {
+      "id": "region-ember",
+      "parentId": null,
+      "level": 1,
+      "name": "Ember",
+      "path": ["Ember"],
+      "value": 34,
+      "polygon": [[495, 400], [760, 390], [1000, 400], [1000, 800], [500, 800], [510, 600]],
+      "categoryColor": "#ce7655",
+      "fill": "#ce7655",
+      "legend": { "text": "Ember", "visible": true },
+      "label": { "text": "Ember", "anchor": [753, 601], "offset": [0, 0], "visible": true }
+    },
+
+    {
+      "id": "theme-aurora-signals",
+      "parentId": "region-aurora",
+      "level": 2,
+      "name": "Early signals",
+      "path": ["Aurora", "Early signals"],
+      "value": 24,
+      "polygon": [[0, 0], [500, 0], [510, 180], [330, 230], [180, 190], [0, 210]],
+      "categoryColor": "#776ac4",
+      "fill": "#a79fda",
+      "label": { "text": "Early signals", "anchor": [253, 101], "offset": [0, 0], "visible": true }
+    },
+    {
+      "id": "theme-aurora-patterns",
+      "parentId": "region-aurora",
+      "level": 2,
+      "name": "Shared patterns",
+      "path": ["Aurora", "Shared patterns"],
+      "value": 18,
+      "polygon": [[0, 210], [180, 190], [330, 230], [510, 180], [495, 400], [250, 390], [0, 400]],
+      "categoryColor": "#776ac4",
+      "fill": "#8c80cb",
+      "label": { "text": "Shared patterns", "anchor": [260, 306], "offset": [0, 0], "visible": true }
+    },
+    {
+      "id": "theme-tide-open",
+      "parentId": "region-tide",
+      "level": 2,
+      "name": "Open currents",
+      "path": ["Tide", "Open currents"],
+      "value": 20,
+      "polygon": [[500, 0], [1000, 0], [1000, 220], [820, 175], [650, 210], [510, 180]],
+      "categoryColor": "#318fa5",
+      "fill": "#72b8c7",
+      "label": { "text": "Open currents", "anchor": [754, 102], "offset": [0, 0], "visible": true }
+    },
+    {
+      "id": "theme-tide-deep",
+      "parentId": "region-tide",
+      "level": 2,
+      "name": "Deep currents",
+      "path": ["Tide", "Deep currents"],
+      "value": 18,
+      "polygon": [[510, 180], [650, 210], [820, 175], [1000, 220], [1000, 400], [760, 390], [495, 400]],
+      "categoryColor": "#318fa5",
+      "fill": "#4da2b5",
+      "label": { "text": "Deep currents", "anchor": [762, 307], "offset": [0, 0], "visible": true }
+    },
+    {
+      "id": "theme-meadow-growing",
+      "parentId": "region-meadow",
+      "level": 2,
+      "name": "Growing paths",
+      "path": ["Meadow", "Growing paths"],
+      "value": 21,
+      "polygon": [[0, 400], [250, 390], [495, 400], [510, 600], [340, 640], [190, 585], [0, 610]],
+      "categoryColor": "#57976d",
+      "fill": "#8bbd9b",
+      "label": { "text": "Growing paths", "anchor": [253, 493], "offset": [0, 0], "visible": true }
+    },
+    {
+      "id": "theme-meadow-resting",
+      "parentId": "region-meadow",
+      "level": 2,
+      "name": "Resting paths",
+      "path": ["Meadow", "Resting paths"],
+      "value": 15,
+      "polygon": [[0, 610], [190, 585], [340, 640], [510, 600], [500, 800], [0, 800]],
+      "categoryColor": "#57976d",
+      "fill": "#68a77b",
+      "label": { "text": "Resting paths", "anchor": [250, 704], "offset": [0, 0], "visible": true }
+    },
+    {
+      "id": "theme-ember-sparks",
+      "parentId": "region-ember",
+      "level": 2,
+      "name": "Bright sparks",
+      "path": ["Ember", "Bright sparks"],
+      "value": 19,
+      "polygon": [[495, 400], [760, 390], [1000, 400], [1000, 590], [830, 630], [650, 570], [510, 600]],
+      "categoryColor": "#ce7655",
+      "fill": "#e5a184",
+      "label": { "text": "Bright sparks", "anchor": [754, 492], "offset": [0, 0], "visible": true }
+    },
+    {
+      "id": "theme-ember-traces",
+      "parentId": "region-ember",
+      "level": 2,
+      "name": "Warm traces",
+      "path": ["Ember", "Warm traces"],
+      "value": 15,
+      "polygon": [[510, 600], [650, 570], [830, 630], [1000, 590], [1000, 800], [500, 800]],
+      "categoryColor": "#ce7655",
+      "fill": "#d78262",
+      "label": { "text": "Warm traces", "anchor": [752, 706], "offset": [0, 0], "visible": true }
+    },
+
+    {
+      "id": "item-aurora-signal-a",
+      "parentId": "theme-aurora-signals",
+      "level": 3,
+      "name": "Signal A",
+      "path": ["Aurora", "Early signals", "Signal A"],
+      "value": 14,
+      "polygon": [[0, 0], [250, 0], [280, 90], [330, 230], [180, 190], [0, 210]],
+      "categoryColor": "#776ac4",
+      "fill": "#b8b1e4",
+      "label": { "text": "Signal A", "anchor": [139, 102], "offset": [0, 0], "visible": true }
+    },
+    {
+      "id": "item-aurora-signal-b",
+      "parentId": "theme-aurora-signals",
+      "level": 3,
+      "name": "Signal B",
+      "path": ["Aurora", "Early signals", "Signal B"],
+      "value": 10,
+      "polygon": [[250, 0], [500, 0], [510, 180], [330, 230], [280, 90]],
+      "categoryColor": "#776ac4",
+      "fill": "#968bd2",
+      "label": { "text": "Signal B", "anchor": [388, 92], "offset": [0, 0], "visible": true }
+    },
+    {
+      "id": "item-aurora-pattern-a",
+      "parentId": "theme-aurora-patterns",
+      "level": 3,
+      "name": "Pattern A",
+      "path": ["Aurora", "Shared patterns", "Pattern A"],
+      "value": 11,
+      "polygon": [[0, 210], [180, 190], [330, 230], [300, 315], [250, 390], [0, 400]],
+      "categoryColor": "#776ac4",
+      "fill": "#a99fda",
+      "label": { "text": "Pattern A", "anchor": [143, 303], "offset": [0, 0], "visible": true }
+    },
+    {
+      "id": "item-aurora-pattern-b",
+      "parentId": "theme-aurora-patterns",
+      "level": 3,
+      "name": "Pattern B",
+      "path": ["Aurora", "Shared patterns", "Pattern B"],
+      "value": 7,
+      "polygon": [[330, 230], [510, 180], [495, 400], [250, 390], [300, 315]],
+      "categoryColor": "#776ac4",
+      "fill": "#8175c5",
+      "label": { "text": "Pattern B", "anchor": [403, 310], "offset": [0, 0], "visible": true }
+    },
+    {
+      "id": "item-tide-open-a",
+      "parentId": "theme-tide-open",
+      "level": 3,
+      "name": "Current A",
+      "path": ["Tide", "Open currents", "Current A"],
+      "value": 12,
+      "polygon": [[500, 0], [750, 0], [720, 105], [650, 210], [510, 180]],
+      "categoryColor": "#318fa5",
+      "fill": "#8ac6d2",
+      "label": { "text": "Current A", "anchor": [620, 91], "offset": [0, 0], "visible": true }
+    },
+    {
+      "id": "item-tide-open-b",
+      "parentId": "theme-tide-open",
+      "level": 3,
+      "name": "Current B",
+      "path": ["Tide", "Open currents", "Current B"],
+      "value": 8,
+      "polygon": [[750, 0], [1000, 0], [1000, 220], [820, 175], [650, 210], [720, 105]],
+      "categoryColor": "#318fa5",
+      "fill": "#5babbc",
+      "label": { "text": "Current B", "anchor": [873, 102], "offset": [0, 0], "visible": true }
+    },
+    {
+      "id": "item-tide-deep-a",
+      "parentId": "theme-tide-deep",
+      "level": 3,
+      "name": "Depth A",
+      "path": ["Tide", "Deep currents", "Depth A"],
+      "value": 10,
+      "polygon": [[510, 180], [650, 210], [820, 175], [790, 290], [760, 390], [495, 400]],
+      "categoryColor": "#318fa5",
+      "fill": "#70b8c7",
+      "label": { "text": "Depth A", "anchor": [648, 302], "offset": [0, 0], "visible": true }
+    },
+    {
+      "id": "item-tide-deep-b",
+      "parentId": "theme-tide-deep",
+      "level": 3,
+      "name": "Depth B",
+      "path": ["Tide", "Deep currents", "Depth B"],
+      "value": 8,
+      "polygon": [[820, 175], [1000, 220], [1000, 400], [760, 390], [790, 290]],
+      "categoryColor": "#318fa5",
+      "fill": "#3d99ad",
+      "label": { "text": "Depth B", "anchor": [901, 303], "offset": [0, 0], "visible": true }
+    },
+    {
+      "id": "item-meadow-growing-a",
+      "parentId": "theme-meadow-growing",
+      "level": 3,
+      "name": "Path A",
+      "path": ["Meadow", "Growing paths", "Path A"],
+      "value": 13,
+      "polygon": [[0, 400], [250, 390], [230, 500], [190, 585], [0, 610]],
+      "categoryColor": "#57976d",
+      "fill": "#9bc8a8",
+      "label": { "text": "Path A", "anchor": [111, 497], "offset": [0, 0], "visible": true }
+    },
+    {
+      "id": "item-meadow-growing-b",
+      "parentId": "theme-meadow-growing",
+      "level": 3,
+      "name": "Path B",
+      "path": ["Meadow", "Growing paths", "Path B"],
+      "value": 8,
+      "polygon": [[250, 390], [495, 400], [510, 600], [340, 640], [190, 585], [230, 500]],
+      "categoryColor": "#57976d",
+      "fill": "#78af89",
+      "label": { "text": "Path B", "anchor": [366, 511], "offset": [0, 0], "visible": true }
+    },
+    {
+      "id": "item-meadow-resting-a",
+      "parentId": "theme-meadow-resting",
+      "level": 3,
+      "name": "Rest A",
+      "path": ["Meadow", "Resting paths", "Rest A"],
+      "value": 9,
+      "polygon": [[0, 610], [190, 585], [340, 640], [300, 720], [250, 800], [0, 800]],
+      "categoryColor": "#57976d",
+      "fill": "#86b794",
+      "label": { "text": "Rest A", "anchor": [139, 698], "offset": [0, 0], "visible": true }
+    },
+    {
+      "id": "item-meadow-resting-b",
+      "parentId": "theme-meadow-resting",
+      "level": 3,
+      "name": "Rest B",
+      "path": ["Meadow", "Resting paths", "Rest B"],
+      "value": 6,
+      "polygon": [[340, 640], [510, 600], [500, 800], [250, 800], [300, 720]],
+      "categoryColor": "#57976d",
+      "fill": "#5c9d70",
+      "label": { "text": "Rest B", "anchor": [405, 704], "offset": [0, 0], "visible": true }
+    },
+    {
+      "id": "item-ember-spark-a",
+      "parentId": "theme-ember-sparks",
+      "level": 3,
+      "name": "Spark A",
+      "path": ["Ember", "Bright sparks", "Spark A"],
+      "value": 11,
+      "polygon": [[495, 400], [760, 390], [700, 490], [650, 570], [510, 600]],
+      "categoryColor": "#ce7655",
+      "fill": "#ebb198",
+      "label": { "text": "Spark A", "anchor": [620, 488], "offset": [0, 0], "visible": true }
+    },
+    {
+      "id": "item-ember-spark-b",
+      "parentId": "theme-ember-sparks",
+      "level": 3,
+      "name": "Spark B",
+      "path": ["Ember", "Bright sparks", "Spark B"],
+      "value": 8,
+      "polygon": [[760, 390], [1000, 400], [1000, 590], [830, 630], [650, 570], [700, 490]],
+      "categoryColor": "#ce7655",
+      "fill": "#dc8e6d",
+      "label": { "text": "Spark B", "anchor": [876, 493], "offset": [0, 0], "visible": true }
+    },
+    {
+      "id": "item-ember-trace-a",
+      "parentId": "theme-ember-traces",
+      "level": 3,
+      "name": "Trace A",
+      "path": ["Ember", "Warm traces", "Trace A"],
+      "value": 9,
+      "polygon": [[510, 600], [650, 570], [830, 630], [790, 710], [750, 800], [500, 800]],
+      "categoryColor": "#ce7655",
+      "fill": "#e2a084",
+      "label": { "text": "Trace A", "anchor": [638, 704], "offset": [0, 0], "visible": true }
+    },
+    {
+      "id": "item-ember-trace-b",
+      "parentId": "theme-ember-traces",
+      "level": 3,
+      "name": "Trace B",
+      "path": ["Ember", "Warm traces", "Trace B"],
+      "value": 6,
+      "polygon": [[830, 630], [1000, 590], [1000, 800], [750, 800], [790, 710]],
+      "categoryColor": "#ce7655",
+      "fill": "#ce7655",
+      "label": { "text": "Trace B", "anchor": [897, 706], "offset": [0, 0], "visible": true }
+    }
+  ]
+}

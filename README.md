@@ -1,8 +1,12 @@
-# tessellart
+<p align="center">
+  <img src="assets/tessellart-logo.png" alt="Tessellart logo" width="160">
+</p>
 
-**A small browser studio for personalizing weighted Voronoi figures.**
+<h1 align="center">tessellart</h1>
 
-## **[Open tessellart →](https://emarquezz.github.io/Tessellart/)**
+<p align="center"><strong>A small browser studio for personalizing weighted Voronoi figures.</strong></p>
+
+<p align="center"><strong><a href="https://emarquezz.github.io/Tessellart/">Open tessellart →</a></strong></p>
 
 tessellart opens weighted Voronoi geometry saved as `.voronoi.json` and lets you refine the figure without recalculating its cells. Labels, borders, colors, legend, canvas, and export settings remain editable while the geometry stays locked.
 
@@ -20,6 +24,8 @@ My M1 Mac and RStudio never quite got along, and I was tired of switching laptop
 ## What tessellart does
 
 The companion Python adaptation calculates the Voronoi geometry; tessellart visualizes and styles its `.voronoi.json` output. The portable format is documented in [`docs/JSON_FORMAT.md`](docs/JSON_FORMAT.md).
+
+A heart-shaped **Tiny Tree of Life** project opens automatically, so you can try the editing controls before loading your own figure. It is a friendly sampler of selected organism groups, not a complete phylogeny. Its names are real examples, while its values and cell areas are synthetic and do not encode abundance, diversity, age, or evolutionary distance.
 
 You can adjust:
 
@@ -78,7 +84,7 @@ Copyright © 2026 tessellart contributors.
 - `index.html` — application page
 - `styles.css` — interface design
 - `app.js` — import, editing, rendering, and export logic
-- `example.voronoi.json` — synthetic three-level editing fixture
+- `example.voronoi.json` — synthetic three-level Tiny Tree of Life fixture
 - `docs/JSON_FORMAT.md` — portable input contract
 - `THIRD_PARTY_NOTICES.md` — upstream acknowledgements and related work
 - `LICENSE` — GNU GPL version 3

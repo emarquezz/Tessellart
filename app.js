@@ -64,9 +64,9 @@
   }
 
   var levelDefaults = {
-    "1": { fontSize: 25, fontFamily: "Arial, Helvetica, sans-serif", fontWeight: 700, color: "#ffffff", lineHeight: 1.05, letterSpacing: 0, wrapWidth: 185, borderWidth: 21, borderMode: "background", borderColor: "#ffffff", innerBorderVisible: true, innerBorderWidth: 21, labelsVisible: false, autoFit: false, autoSize: false, autoSizeMin: 14, autoSizeMax: 120, autoSizeMaxLines: 4, fitPadding: 5 },
-    "2": { fontSize: 17, fontFamily: "Arial, Helvetica, sans-serif", fontWeight: 700, color: "#111827", lineHeight: 1.08, letterSpacing: 0, wrapWidth: 145, borderWidth: 4, borderMode: "cell", borderColor: "#ffffff", innerBorderVisible: false, innerBorderWidth: 0, labelsVisible: true, autoFit: false, autoSize: true, autoSizeMin: 14, autoSizeMax: 120, autoSizeMaxLines: 4, fitPadding: 5 },
-    "3": { fontSize: 12, fontFamily: "Arial, Helvetica, sans-serif", fontWeight: 500, color: "#111827", lineHeight: 1.1, letterSpacing: 0, wrapWidth: 96, borderWidth: 1.4, borderMode: "background", borderColor: "#ffffff", innerBorderVisible: false, innerBorderWidth: 0, labelsVisible: false, autoFit: true, autoSize: false, autoSizeMin: 14, autoSizeMax: 96, autoSizeMaxLines: 4, fitPadding: 5 }
+    "1": { fontSize: 12, fontFamily: "Arial, Helvetica, sans-serif", fontWeight: 400, color: "#000000", lineHeight: 1.15, letterSpacing: 0, wrapWidth: 185, borderWidth: 14, borderMode: "custom", borderColor: "#ffffff", innerBorderVisible: true, innerBorderWidth: 21, labelsVisible: false, autoFit: true, autoSize: false, autoSizeMin: 14, autoSizeMax: 120, autoSizeMaxLines: 4, fitPadding: 5 },
+    "2": { fontSize: 18, fontFamily: "Arial, Helvetica, sans-serif", fontWeight: 400, color: "#ffffff", lineHeight: 1.15, letterSpacing: 0, wrapWidth: 145, borderWidth: 4, borderMode: "custom", borderColor: "#000000", innerBorderVisible: false, innerBorderWidth: 0, labelsVisible: true, autoFit: false, autoSize: true, autoSizeMin: 14, autoSizeMax: 120, autoSizeMaxLines: 4, fitPadding: 5 },
+    "3": { fontSize: 12, fontFamily: "Arial, Helvetica, sans-serif", fontWeight: 400, color: "#000000", lineHeight: 1.15, letterSpacing: 0, wrapWidth: 96, borderWidth: 2, borderMode: "custom", borderColor: "#000000", innerBorderVisible: false, innerBorderWidth: 0, labelsVisible: false, autoFit: true, autoSize: false, autoSizeMin: 14, autoSizeMax: 96, autoSizeMaxLines: 4, fitPadding: 5 }
   };
   var canvasDefaults = { width: 1400, height: 980, background: "#f7f4ed", padding: 44, cellGap: 0, title: "Voronoi treemap", titleVisible: true, titleSize: 34, titleColor: "#25313b", legendVisible: true, legendPosition: "right", legendSize: 450, legendFontSize: 26, legendTitle: "LEVEL 1", legendTitleVisible: true, legendTitleSize: 25, legendOrder: [], legendGrowCanvas: true };
 
@@ -175,7 +175,7 @@
     // direct `levels` object, so every saved choice takes precedence instead.
     if (!hasEditorLevelSettings) {
       if (levels["1"]) {
-        levels["1"].borderWidth = 21;
+        levels["1"].borderWidth = 14;
         levels["1"].innerBorderVisible = true;
         levels["1"].innerBorderWidth = 21;
       }

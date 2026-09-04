@@ -68,7 +68,7 @@
     "2": { fontSize: 18, fontFamily: "Arial, Helvetica, sans-serif", fontWeight: 400, color: "#ffffff", lineHeight: 1.15, letterSpacing: 0, wrapWidth: 145, borderWidth: 4, borderMode: "custom", borderColor: "#000000", innerBorderVisible: false, innerBorderWidth: 0, labelsVisible: true, autoFit: false, autoSize: true, autoSizeMin: 14, autoSizeMax: 120, autoSizeMaxLines: 4, fitPadding: 5 },
     "3": { fontSize: 12, fontFamily: "Arial, Helvetica, sans-serif", fontWeight: 400, color: "#000000", lineHeight: 1.15, letterSpacing: 0, wrapWidth: 96, borderWidth: 2, borderMode: "custom", borderColor: "#000000", innerBorderVisible: false, innerBorderWidth: 0, labelsVisible: false, autoFit: true, autoSize: false, autoSizeMin: 14, autoSizeMax: 96, autoSizeMaxLines: 4, fitPadding: 5 }
   };
-  var canvasDefaults = { width: 1400, height: 980, background: "#f7f4ed", padding: 44, cellGap: 0, title: "Voronoi treemap", titleVisible: true, titleSize: 34, titleColor: "#25313b", legendVisible: true, legendPosition: "right", legendSize: 450, legendFontSize: 26, legendTitle: "LEVEL 1", legendTitleVisible: true, legendTitleSize: 25, legendOrder: [], legendGrowCanvas: true };
+  var canvasDefaults = { width: 1400, height: 980, background: "#f7f4ed", padding: 44, cellGap: 0, title: "Voronoi treemap", titleVisible: true, titleSize: 30, titleColor: "#25313b", legendVisible: true, legendPosition: "right", legendSize: 450, legendFontSize: 26, legendTitle: "LEVEL 1", legendTitleVisible: true, legendTitleSize: 25, legendOrder: [], legendGrowCanvas: true };
 
   function calculateBounds(cells) {
     var minimumX = Infinity; var minimumY = Infinity; var maximumX = -Infinity; var maximumY = -Infinity;
@@ -336,6 +336,58 @@
     }, []);
   }
 
+  // Return the most compact contiguous word partition for an exact number of
+  // lines. Auto-sizing evaluates several line counts independently because a
+  // label that fails as one long line may fit very well as two or three.
+  function balancedWrapForLineCount(text, lineCount, fontSize, style) {
+    var words = String(text).trim().split(/\s+/).filter(Boolean);
+    if (!words.length) return lineCount === 1 ? [""] : null;
+    if (lineCount < 1 || lineCount > words.length) return null;
+
+    var phraseWidths = words.map(function (_, start) {
+      return words.slice(start).map(function (_, offset) {
+        return lineWidth(words.slice(start, start + offset + 1).join(" "), fontSize, style);
+      });
+    });
+    var states = Array.from({ length: lineCount + 1 }, function () { return Array(words.length + 1).fill(null); });
+    states[0][0] = { widest: 0, squareTotal: 0, lines: [] };
+
+    for (var used = 1; used <= lineCount; used += 1) {
+      for (var end = used; end <= words.length; end += 1) {
+        for (var start = used - 1; start < end; start += 1) {
+          var previous = states[used - 1][start];
+          if (!previous || words.length - end < lineCount - used) continue;
+          var width = phraseWidths[start][end - start - 1];
+          var candidate = {
+            widest: Math.max(previous.widest, width),
+            squareTotal: previous.squareTotal + width * width,
+            lines: previous.lines.concat(words.slice(start, end).join(" "))
+          };
+          var current = states[used][end];
+          if (!current || candidate.widest < current.widest - .01 || (Math.abs(candidate.widest - current.widest) <= .01 && candidate.squareTotal < current.squareTotal)) {
+            states[used][end] = candidate;
+          }
+        }
+      }
+    }
+    var result = states[lineCount][words.length];
+    return result ? result.lines : null;
+  }
+  function automaticWrapCandidates(text, lineCount, fontSize, style) {
+    var candidates = [];
+    var seen = new Set();
+    var explicitLines = String(text).split(/\r?\n/).map(function (line) { return line.trim(); });
+    // Keep imported or hand-authored line breaks as the preferred candidate,
+    // while still allowing auto-size to reflow them when another partition
+    // can produce a meaningfully larger readable label.
+    if (explicitLines.length > 1 && explicitLines.length === lineCount) {
+      candidates.push(explicitLines); seen.add(explicitLines.join("\n"));
+    }
+    var balanced = balancedWrapForLineCount(text, lineCount, fontSize, style);
+    if (balanced && !seen.has(balanced.join("\n"))) candidates.push(balanced);
+    return candidates;
+  }
+
   function wrapLegendText(text, width, fontSize, style) {
     return String(text).split(/\r?\n/).reduce(function (all, explicitLine) {
       return all.concat(wrapLabelMeasured(explicitLine, width, fontSize, style));
@@ -486,10 +538,9 @@
     }
     return pointInPolygon([(box.left + box.right) / 2, (box.top + box.bottom) / 2], polygon);
   }
-  function makeLabelLayout(cell, style, layout, fontSize, wrapWidth, measuredWrapping) {
+  function makeLabelLayoutFromLines(cell, style, layout, fontSize, lines) {
     var anchor = layout.transform(cell.label.anchor || polygonCentroid(cell.polygon));
     var x = anchor[0] + cell.label.offset[0]; var y = anchor[1] + cell.label.offset[1];
-    var lines = measuredWrapping ? wrapLabelMeasured(cell.label.text, wrapWidth, fontSize, style) : wrapLabel(cell.label.text, wrapWidth, fontSize);
     var width = Math.max.apply(null, lines.map(function (line) { return lineWidth(line, fontSize, style); }).concat([1]));
     var height = Math.max(1, lines.length) * fontSize * style.lineHeight;
     var safety = Math.max(2, fontSize * .045) + (style.autoSize ? finite(style.fitPadding, 5) : 0);
@@ -501,23 +552,65 @@
       box: { left: x - width / 2 - safety, right: x + width / 2 + safety, top: y - height / 2 - safety, bottom: y + height / 2 + safety }
     };
   }
+  function makeLabelLayout(cell, style, layout, fontSize, wrapWidth, measuredWrapping) {
+    var lines = measuredWrapping ? wrapLabelMeasured(cell.label.text, wrapWidth, fontSize, style) : wrapLabel(cell.label.text, wrapWidth, fontSize);
+    return makeLabelLayoutFromLines(cell, style, layout, fontSize, lines);
+  }
+  function makeAutoLabelLayouts(cell, style, layout, fontSize, lineCount) {
+    return automaticWrapCandidates(cell.label.text, lineCount, fontSize, style).map(function (lines) {
+      return makeLabelLayoutFromLines(cell, style, layout, fontSize, lines);
+    });
+  }
+  function boxSize(box) {
+    return { width: Math.max(1, box.right - box.left), height: Math.max(1, box.bottom - box.top) };
+  }
+  function overflowScore(candidate, bounds, borderPadding) {
+    var size = boxSize(candidate.box);
+    var availableWidth = Math.max(1, bounds.maxX - bounds.minX - borderPadding * 2);
+    var availableHeight = Math.max(1, bounds.maxY - bounds.minY - borderPadding * 2);
+    var widthRatio = size.width / availableWidth;
+    var heightRatio = size.height / availableHeight;
+    return Math.max(widthRatio, heightRatio) + Math.min(widthRatio, heightRatio) * .05;
+  }
   function largestFittingLabel(cell, style, layout) {
     var polygon = cell.polygon.map(layout.transform);
     var bounds = canvasPolygonBounds(polygon);
     var borderPadding = Math.max(4, style.borderWidth * .75);
-    var availableWidth = Math.max(8, bounds.maxX - bounds.minX - borderPadding * 2);
     var minimum = Math.max(3, finite(style.autoSizeMin, 5));
     var maximum = Math.max(minimum, finite(style.autoSizeMax, 120));
-    var best = null; var low = minimum; var high = maximum;
-    for (var iteration = 0; iteration < 12; iteration += 1) {
-      var candidateSize = (low + high) / 2;
-      var candidate = makeLabelLayout(cell, style, layout, candidateSize, availableWidth, true);
-      if (candidate.lines.length <= finite(style.autoSizeMaxLines, 4) && boxInsidePolygon(candidate.box, polygon)) { best = candidate; low = candidateSize; }
-      else high = candidateSize;
-    }
-    if (!best) {
-      var minimumCandidate = makeLabelLayout(cell, style, layout, minimum, availableWidth, true);
-      if (minimumCandidate.lines.length <= finite(style.autoSizeMaxLines, 4) && boxInsidePolygon(minimumCandidate.box, polygon)) best = minimumCandidate;
+    var maximumLines = Math.max(1, Math.round(finite(style.autoSizeMaxLines, 4)));
+    var wordCount = String(cell.label.text).trim().split(/\s+/).filter(Boolean).length;
+    var lineCounts = Array.from({ length: Math.min(maximumLines, Math.max(1, wordCount)) }, function (_, index) { return index + 1; });
+    var best = null;
+    var fallback = null;
+
+    lineCounts.forEach(function (lineCount) {
+      var minimumCandidates = makeAutoLabelLayouts(cell, style, layout, minimum, lineCount);
+      if (!minimumCandidates.length) return;
+      minimumCandidates.forEach(function (minimumCandidate) {
+        var candidateScore = overflowScore(minimumCandidate, bounds, borderPadding);
+        if (!fallback || candidateScore < fallback.score - .001 || (Math.abs(candidateScore - fallback.score) <= .001 && minimumCandidate.lines.length < fallback.layout.lines.length)) {
+          fallback = { layout: minimumCandidate, score: candidateScore };
+        }
+      });
+      var minimumFitting = minimumCandidates.find(function (candidate) { return boxInsidePolygon(candidate.box, polygon); });
+      if (!minimumFitting) return;
+
+      var lineBest = minimumFitting; var low = minimum; var high = maximum;
+      for (var iteration = 0; iteration < 12; iteration += 1) {
+        var candidateSize = (low + high) / 2;
+        var candidate = makeAutoLabelLayouts(cell, style, layout, candidateSize, lineCount).find(function (option) { return boxInsidePolygon(option.box, polygon); });
+        if (candidate) { lineBest = candidate; low = candidateSize; }
+        else high = candidateSize;
+      }
+      if (!best || lineBest.fontSize > best.fontSize + .05 || (Math.abs(lineBest.fontSize - best.fontSize) <= .05 && lineBest.lines.length < best.lines.length)) best = lineBest;
+    });
+
+    // "Fit labels inside cells" owns the decision to hide an impossible label.
+    // With that option off, retain the most compact readable wrap at the
+    // minimum size so auto-maximization never silently makes a label vanish.
+    if (!best && !style.autoFit && fallback) {
+      best = fallback.layout;
     }
     if (best) best.fontSize = Math.round(best.fontSize * 10) / 10;
     return best;

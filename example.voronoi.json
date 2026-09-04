@@ -584,7 +584,7 @@
     "title": {
       "text": "A Tiny Tree of Life",
       "visible": true,
-      "fontSize": 34,
+      "fontSize": 30,
       "color": "#25313B"
     },
     "legend": {

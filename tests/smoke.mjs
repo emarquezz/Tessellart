@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import vm from "node:vm";
 
 const root = new URL("../", import.meta.url);
 const [html, app, styles, readme, fixtureText, logo, favicon, appleTouchIcon] = await Promise.all([
@@ -226,7 +227,56 @@ assert.equal(pointRelation([centerX + width * .23, bounds.minY + height * .18], 
 assert.equal(pointRelation([centerX, bounds.minY + height * .45], silhouette), "inside", "heart center is hollow");
 assert.equal(pointRelation([centerX, bounds.maxY - height * .18], silhouette), "inside", "heart lower body is missing");
 
+const instrumentedApp = app.replace(
+  /\n  start\(\);\n}\(\)\);\s*$/,
+  "\n  globalThis.__layoutSmoke = { largestFittingLabel, boxInsidePolygon };\n}());\n"
+);
+assert.notEqual(instrumentedApp, app, "label-layout smoke hook could not be installed");
+const measurement = {
+  font: "",
+  measureText(text) {
+    const match = this.font.match(/([0-9.]+)px/);
+    const size = match ? Number(match[1]) : 10;
+    return { width: String(text).length * size * .54 };
+  }
+};
+const browserlessContext = {
+  document: { createElement: () => ({ getContext: () => measurement }) }
+};
+vm.createContext(browserlessContext);
+vm.runInContext(instrumentedApp, browserlessContext);
+const layoutApi = browserlessContext.__layoutSmoke;
+const autoStyle = {
+  fontFamily: "Arial, Helvetica, sans-serif", fontWeight: 400, letterSpacing: 0,
+  lineHeight: 1.15, borderWidth: 0, autoSize: true, autoFit: false,
+  autoSizeMin: 14, autoSizeMax: 120, autoSizeMaxLines: 4, fitPadding: 5
+};
+const identityLayout = { transform: (point) => point };
+const testCell = (text, polygon, anchor) => ({ polygon, label: { text, anchor, offset: [0, 0] } });
+
+const diamond = [[0, 70], [100, 0], [200, 70], [100, 140]];
+const reflowed = layoutApi.largestFittingLabel(testCell("Other carbon fixation\npathways", diamond, [100, 70]), autoStyle, identityLayout);
+assert.ok(reflowed, "auto-size discarded a label that fits after reflowing its imported line break");
+assert.ok(reflowed.lines.length >= 3 && reflowed.lines.length <= 4, "long labels should explore compact three- or four-line wraps");
+assert.equal(Array.from(reflowed.lines).join(" "), "Other carbon fixation pathways", "auto-size changed the label words or order");
+assert.ok(reflowed.fontSize >= 14, "auto-size fell below the readable minimum");
+assert.equal(layoutApi.boxInsidePolygon(reflowed.box, diamond), true, "reflowed label does not actually fit its polygon");
+
+const twoWord = layoutApi.largestFittingLabel(testCell("Methane metabolism", [[0, 0], [100, 0], [100, 80], [0, 80]], [50, 40]), autoStyle, identityLayout);
+assert.deepEqual(Array.from(twoWord.lines), ["Methane", "metabolism"], "two-word labels should be allowed to split across two lines");
+assert.ok(twoWord.fontSize > 14, "two-line wrapping did not improve the two-word label size");
+
+const tinyCell = testCell("Tiny label", [[0, 0], [30, 0], [30, 22], [0, 22]], [15, 11]);
+const retainedTiny = layoutApi.largestFittingLabel(tinyCell, autoStyle, identityLayout);
+assert.ok(retainedTiny && retainedTiny.fontSize === 14, "fit-off auto-size should retain an impossible label at the readable minimum");
+assert.equal(layoutApi.largestFittingLabel(tinyCell, { ...autoStyle, autoFit: true }, identityLayout), null, "fit-on auto-size should still hide an impossible label");
+
 assert.equal((app.match(/autoSizeMin: 14/g) || []).length, 3, "automatic labels need a readable minimum size at every level");
+assert.match(app, /function balancedWrapForLineCount\(/, "automatic labels need multi-line partition search");
+assert.match(app, /function automaticWrapCandidates\(/, "automatic labels need to reflow imported line breaks when a better wrap fits");
+assert.match(app, /if \(!best && !style\.autoFit && fallback\)/, "automatic labels must remain visible when fit filtering is disabled");
+assert.match(app, /titleSize: 30, titleColor:/, "new projects need a 30 px figure title");
+assert.equal(fixture.style.title.fontSize, 30, "the bundled example needs a 30 px figure title");
 assert.match(app, /borderWidth: 14, borderMode: "custom", borderColor: "#ffffff", innerBorderVisible: true, innerBorderWidth: 21/, "Level 1 needs a 14 px white center line and 21 px category rim");
 assert.match(app, /"2": \{ fontSize: 18,[^\n]+fontWeight: 400, color: "#ffffff"[^\n]+borderWidth: 4, borderMode: "custom", borderColor: "#000000"/, "Level 2 defaults no longer match the COG project");
 assert.match(app, /"3": \{ fontSize: 12,[^\n]+fontWeight: 400, color: "#000000"[^\n]+borderWidth: 2, borderMode: "custom", borderColor: "#000000"/, "Level 3 defaults no longer match the COG project");
